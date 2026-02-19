@@ -1,2 +1,7 @@
 data/
+.vscode
 cnn/data1
+pizza_steak_sushi
+custom_data_cnn/pizza_steak_sushi_20_percent
+*.pth
+__pycache__
