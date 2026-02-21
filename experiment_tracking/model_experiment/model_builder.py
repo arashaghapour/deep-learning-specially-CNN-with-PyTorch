@@ -49,11 +49,14 @@ def adjust_num_classes(model: torch.nn.Module, num_class: int, device: str):
     num_class: number of label kind that data have
 
     """
+    in_features = model.classifier[-1].in_features
     model.classifier = nn.Sequential(
         nn.Dropout(),
-        nn.Linear(in_features=1280, out_features=num_class)
+        nn.Linear(in_features=in_features, out_features=num_class)
     ).to(device=device)
     model_summary(model=model)
+
+
 
 
 def create_b2_model(device: str):

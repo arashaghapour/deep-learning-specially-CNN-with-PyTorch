@@ -39,10 +39,6 @@ big_train_dataloader, big_test_dataloader, big_classes = data_setup.data_to_data
                                                                                  transform=b0_transform,
                                                                                  batch_size=args.batch_size)
 
-food101_train_dataloader, food101test_dataloader, food101_classes = get_data.get_foof101dataset(root=path/"food101",
-                                                                                             transform=b0_transform,
-                                                                                             download=args.download,
-                                                                                             batch_size=args.batch_size)
 food101_train_dataset, food101test_dataloader, food101_classes = data_setup.fake_data(transform=b0_transform,
                                                                                       batch_size=args.batch_size)
 
@@ -50,7 +46,9 @@ optimizer = torch.optim.Adam(params=model_0.parameters(), lr=args.lr)
 loss_fn = torch.nn.CrossEntropyLoss()
 models = {"model_0": model_0}
 data = {"train_data": train_dataloader}
-epochs = [1]
+model_builder.model_summary(model=model_1)
+
+epochs = [5]
 experiment = 0
 for model_name, model in models.items():
     for data_name, data in data.items():
@@ -59,8 +57,11 @@ for model_name, model in models.items():
             print(f"model_name: {model_name}")
             print(f"data_name: {data_name}")
             print(f"epoch: {epoch}")
-            writer = logger.create_writer(model_name=model_name, experiment_name=experiment)
-            model_builder.adjust_num_classes(model=model, num_class=classes) if data_name == "train_data" else model_builder.adjust_num_classes(model=model, num_class=big_classes)
+            writer = logger.create_writer(model_name=model_name, experiment_name=str(experiment))
+            if data_name == "train_data":
+                model_builder.adjust_num_classes(model=model, num_class=len(classes), device=device)
+            else:
+                model_builder.adjust_num_classes(model=model, num_class=len(big_classes), device=device)
             optimizer = torch.optim.Adam(params=model.parameters(), lr=args.lr)
             engine.train_model(model=model,
                                device=device,
@@ -71,24 +72,33 @@ for model_name, model in models.items():
                                loss_fn=loss_fn,
                                writer=writer)
             experiment += 1
+            utils.save_model(model=model, path="./models")
+            
 
 
+food101_train_dataloader, food101test_dataloader, food101_classes = get_data.get_foof101dataset(root=path/"food101",
+                                                                                             transform=b0_transform,
+                                                                                             download=args.download,
+                                                                                             batch_size=args.batch_size)
+
+import os
+os.mkdir()
 models = {"model_0": model_0}
 lrs = [0.1]
 hidden_units = [10]
-model_builder.adjust_num_classes(model=model_0, num_class=food101_classes)
-model_builder.adjust_num_classes(model=model_1, num_class=food101_classes)
+model_builder.adjust_b0_num_classes(model=model_0, num_class=len(food101_classes), device=device)
+model_builder.adjust_num_classes(model=model_1, num_class=len(food101_classes), device=device)
 for model_name, model in models.items():
     for lr in lrs:
         for hidden_unit in hidden_units:
             print(f"experiment: {experiment}")
             print(f"learning_rate: {lr}")
             print(f"hidden_unit: {hidden_unit}")
-            print(f"model: {model}")
-            writer = logger.create_writer(model_name=model_name, experiment_name=experiment)
+            print(f"model: {model_name}")
+            writer = logger.create_writer(model_name=model_name, experiment_name=str(experiment))
             engine.train_model(model=model,
                                device=device,
-                               train_data=food101_train_dataset,
+                               train_data=food101_train_dataloader,
                                test_data=food101test_dataloader,
                                epochs=epoch,
                                optimizer=optimizer,
