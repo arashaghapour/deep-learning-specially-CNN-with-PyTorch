@@ -7,7 +7,6 @@ from torchvision.datasets import FakeData
 
 def imagefolder_without_transform(data_path: str):
     dataset = ImageFolder(root=data_path)
-
     return dataset
 
 def fake_data(transform, batch_size: int):

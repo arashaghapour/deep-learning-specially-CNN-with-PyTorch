@@ -5,3 +5,5 @@ pizza_steak_sushi
 custom_data_cnn/pizza_steak_sushi_20_percent
 *.pth
 __pycache__
+run/
+07_pytorch_experiment_tracking_video (1).ipynb
